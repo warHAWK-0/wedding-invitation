@@ -1,0 +1,320 @@
+/* ============================================================
+   Design tokens — lifted from the master style frame
+   ============================================================ */
+:root {
+  --ivory: #f7f1e3;
+  --ivory-deep: #efe6d2;
+  --sandstone: #e3d2b4;
+  --warm-beige: #d9c29f;
+  --peach: #f0b189;
+  --dusty-rose: #d4938f;
+  --sage: #7e8f60;
+  --olive: #5c6f45;
+  --marigold: #efa51c;
+  --saffron: #e27d1d;
+  --gold: #a5872c;
+  --gold-light: #c9ac5c;
+
+  /* warm brown ink, never near-black */
+  --ink: #3e3226;
+  --ink-soft: #6b5b48;
+  --ink-faint: #9a8a74;
+
+  --venue-elegance: #efa51c; /* Elegance Samruddhi */
+  --venue-rk: #99392c;       /* RK Gardenia */
+
+  --serif: 'Cormorant Garamond', 'Georgia', serif;
+  --deva: 'Tiro Devanagari Hindi', 'Cormorant Garamond', serif;
+
+  --frame-inset: 14px;
+  --shell: 430px;
+}
+
+/* ============================================================
+   Reset & shell
+   ============================================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  overflow: hidden !important;
+  height: 100% !important;
+  background: #2a231b;
+  font-family: var(--serif);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  height: 100% !important;
+  overflow: hidden !important;
+  max-width: var(--shell);
+  margin: 0 auto;
+  position: relative;
+  background: var(--ivory);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.45);
+}
+
+/* ============================================================
+   The one scrolling box — every slide is a direct child
+   ============================================================ */
+.snap {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: var(--shell);
+  margin: 0 auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-y: none;
+}
+.snap::-webkit-scrollbar {
+  display: none;
+}
+.snap[data-locked='true'] {
+  overflow-y: hidden;
+}
+
+.slide {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   Plate art + fallback wash
+
+   .plate__layer is the only thing that moves — one transformed
+   element per slide, so the parallax and the breath stay on the
+   compositor and never trigger layout.
+   ============================================================ */
+.plate {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.plate__layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.plate__wash {
+  position: absolute;
+  inset: 0;
+}
+.plate__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.plate__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* The dissolve. Zero when the slide is at rest, deep while it
+   shares the screen with its neighbour — so the seam between two
+   full-bleed plates reads as a fade through shadow, not a cut. */
+.plate__veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* ============================================================
+   Paper grain — one fixed layer for the whole site
+   ============================================================ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  max-width: var(--shell);
+  margin: 0 auto;
+  pointer-events: none;
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  background-repeat: repeat;
+  background-size: 160px 160px;
+}
+
+/* ============================================================
+   Gold hairline frame — the repeated device
+   ============================================================ */
+.frame {
+  position: absolute;
+  inset: var(--frame-inset);
+  pointer-events: none;
+  border: 1px solid var(--frame-color, rgba(165, 135, 44, 0.55));
+}
+.frame::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--frame-color, rgba(165, 135, 44, 0.28));
+}
+.frame__corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  stroke: var(--frame-color, rgba(165, 135, 44, 0.75));
+  fill: none;
+  stroke-width: 1.1;
+}
+.frame__corner--tl { top: -1px; left: -1px; }
+.frame__corner--tr { top: -1px; right: -1px; transform: scaleX(-1); }
+.frame__corner--bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
+.frame__corner--br { bottom: -1px; right: -1px; transform: scale(-1); }
+
+/* ============================================================
+   Type
+   ============================================================ */
+.deva {
+  font-family: var(--deva);
+  font-weight: 400;
+}
+
+.eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--accent, var(--gold));
+}
+
+.display {
+  font-size: clamp(46px, 13.5vw, 66px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 0.95;
+  letter-spacing: -0.005em;
+}
+
+.rule {
+  height: 1px;
+  background: currentColor;
+  opacity: 0.28;
+  border: 0;
+}
+
+/* ============================================================
+   Content block sitting over the art
+   ============================================================ */
+.copy {
+  position: relative;
+  z-index: 2;
+  padding: 0 34px calc(46px + env(safe-area-inset-bottom));
+}
+
+/* ============================================================
+   Left-edge journey rail
+   ============================================================ */
+.rail {
+  position: fixed;
+  left: max(6px, env(safe-area-inset-left));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: center;
+  pointer-events: none;
+}
+.rail__tick {
+  width: 1px;
+  height: 12px;
+  background: var(--ink-faint);
+  opacity: 0.5;
+  transition: height 0.35s ease, opacity 0.35s ease, background-color 0.35s ease;
+}
+.rail__tick[data-on='true'] {
+  height: 26px;
+  opacity: 1;
+}
+.rail__day {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.55;
+  margin: 3px 0;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  font-family: var(--serif);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font-size: 13.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+
+.icon-btn {
+  position: fixed;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(165, 135, 44, 0.5);
+  background: rgba(247, 241, 227, 0.82);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* ============================================================
+   Accessibility floor
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
