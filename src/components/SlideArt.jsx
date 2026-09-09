@@ -34,6 +34,10 @@ export default function SlideArt({
   /* Distance from that edge. Negative hangs the art off the slide,
      which is what puts a cut safely out of sight. */
   inset = 0,
+  /* Space under flow art, mirroring `top`. Making the two
+     adjustable is how the picture is nudged up or down inside the
+     space it is centred in. */
+  bottom = 18,
   opacity: peak = 1,
   /* Pass `play` for a one-shot entrance (the hero, and the
      thank-you, which both appear without a scroll to ride in on).
@@ -77,18 +81,21 @@ export default function SlideArt({
               y,
               opacity,
               display: 'block',
-              /* The element box is capped by `width` and filled to
-                 whatever height the flex item was given; `contain`
-                 then fits the picture inside it. A percentage
-                 max-height would not do this — it has no definite
-                 height to resolve against here, and the art simply
-                 overflowed off the top of the slide. */
-              width: '100%',
+              /* Bounded on both axes and left at its natural
+                 ratio, so the element box *is* the picture — no
+                 dead space inside it. Filling the box and letting
+                 `contain` letterbox instead would park all the
+                 slack on one side of the image, which is what made
+                 the portrait sit low with a hole above it.
+
+                 A percentage max-height needs a definite height to
+                 resolve against; it gets one here because the flex
+                 item above has been sized by the time this is
+                 laid out. */
               maxWidth: width,
-              height: '100%',
-              objectFit: 'contain',
-              objectPosition: 'bottom center',
-              margin: '0 auto',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
             }
           : { y, opacity, width: '100%', display: 'block' }
       }
@@ -125,8 +132,13 @@ export default function SlideArt({
         position: 'relative',
         flex: '1 1 auto',
         minHeight: 0,
+        /* Centred in whatever room is left, so a taller phone adds
+           air evenly above and below rather than all of it above. */
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         paddingTop: top,
-        paddingBottom: 18,
+        paddingBottom: bottom,
         pointerEvents: 'none',
       }}
       aria-hidden="true"

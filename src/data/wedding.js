@@ -328,13 +328,14 @@ export function countdownTarget(side) {
    art as well as the same words. */
 export const BLESSING_ART = {
   src: '/plates/ganesha-portrait.png',
-  /* Sized off the tightest of the two sides. The groom's blessing
-     copy starts higher than the bride's — his side carries a
-     contact block the bride's did not — so 220 wide lands the
-     bottom of the frame about 20px clear of the first line on
-     both. Grow this and it will touch the type on the groom's. */
-  width: 220,
-  top: 32,
+  /* Centred in the space above the blessing, with a little more
+     room left beneath it than above — that reads as deliberate,
+     where dead-centre in a tall gap reads as adrift. The width cap
+     is what decides the size on a big phone; on a short one the
+     height runs out first and the picture shrinks to suit. */
+  width: 236,
+  top: 16,
+  bottom: 34,
 }
 
 export const BLESSING = {
