@@ -1,8 +1,10 @@
 import { motion, useTransform } from 'framer-motion'
 import PlateArt from './PlateArt'
+import SlideArt from './SlideArt'
 import Frame from './Frame'
 import { IntroReveal } from './Reveal'
 import { useEasedProgress, useSlideProgress } from '../hooks/useSlideScroll'
+import { useSide } from '../hooks/useSide'
 import { COUPLE } from '../data/wedding'
 
 /* Slide 1 after the envelope: who is inviting, and who for.
@@ -11,8 +13,13 @@ import { COUPLE } from '../data/wedding'
    This is the one slide with no "arriving" scroll to ride in on —
    it is already there when the envelope lifts — so each line plays
    a one-shot entrance keyed to `play`, then hands over to the
-   scroll link for the exit. */
+   scroll link for the exit.
+
+   Each family is greeted by their own house, in their own script,
+   and reads their own name first — the way each side's printed
+   card would have set it. */
 export default function HeroSlide({ index, play }) {
+  const { copy, script } = useSide()
   const p = useSlideProgress(index)
   const eased = useEasedProgress(index)
 
@@ -21,7 +28,7 @@ export default function HeroSlide({ index, play }) {
   const ruleScale = useTransform(eased, [0.5, 0.78], [1, 0])
 
   return (
-    <section className="slide" aria-label="Suraj and Varsha">
+    <section className="slide" aria-label={`${copy.first} and ${copy.second}`}>
       <PlateArt
         src="/plates/hero.jpg"
         wash={['#f8f2e5', '#e6dcc4', '#c8b291']}
@@ -35,10 +42,14 @@ export default function HeroSlide({ index, play }) {
           play={play}
           delay={0.25}
           order={0}
-          className="deva"
-          style={{ fontSize: 15, color: 'var(--gold-light)', marginBottom: 4 }}
+          className={script}
+          style={{
+            fontSize: script === 'tamil' ? 13.5 : 15,
+            color: 'var(--gold-light)',
+            marginBottom: 4,
+          }}
         >
-          {COUPLE.family.hi}
+          {copy.family.native}
         </IntroReveal>
 
         <IntroReveal
@@ -55,7 +66,7 @@ export default function HeroSlide({ index, play }) {
             maxWidth: '30ch',
           }}
         >
-          {COUPLE.family.en} invite you to the wedding of
+          {copy.invite}
         </IntroReveal>
 
         <IntroReveal
@@ -67,7 +78,7 @@ export default function HeroSlide({ index, play }) {
           className="display"
           style={{ marginTop: 14 }}
         >
-          {COUPLE.groom.en}
+          {copy.first}
         </IntroReveal>
 
         <IntroReveal p={eased} play={play} delay={0.75} order={3}>
@@ -83,7 +94,7 @@ export default function HeroSlide({ index, play }) {
           >
             <span style={{ height: 1, width: 44, background: 'var(--gold-light)' }} />
             <span style={{ fontSize: 20, fontStyle: 'italic', opacity: 0.85 }}>
-              and
+              {copy.joiner}
             </span>
             <span
               style={{
@@ -104,7 +115,7 @@ export default function HeroSlide({ index, play }) {
           y={34}
           className="display"
         >
-          {COUPLE.bride.en}
+          {copy.second}
         </IntroReveal>
 
         <IntroReveal
@@ -125,6 +136,13 @@ export default function HeroSlide({ index, play }) {
           <span style={{ opacity: 0.7 }}>{COUPLE.city}</span>
         </IntroReveal>
       </div>
+
+      {/* Two hands reaching for each other across the head of the
+          slide. Both arms are cut off at their own edges — they
+          come in from off the canvas — so this runs the full width
+          and lets those cuts land past the screen, where they read
+          as the arms continuing rather than as crops. */}
+      <SlideArt src="/plates/hands-art.png" width="100%" top={54} play={play} p={p} />
 
       <ScrollCue play={play} p={p} />
     </section>

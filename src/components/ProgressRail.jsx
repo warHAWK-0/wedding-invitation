@@ -1,14 +1,16 @@
 import { Fragment } from 'react'
-import { EVENTS } from '../data/wedding'
 
-/* A tick per slide down the left edge. It encodes the two-day
-   sequence, with a small gold dot marking where the 13th ends and
-   the 14th begins — so you always know where you are in the arc. */
-const EVENTS_START = 2 // hero, countdown, then the ceremonies
+/* A tick per slide down the left edge. It encodes the sequence
+   for whichever side is reading, with a small gold dot marking
+   where the 13th ends and the 14th begins — so you always know
+   where you are in the arc.
 
-export default function ProgressRail({ index, total }) {
-  const firstDay = EVENTS.filter((e) => e.day === 'Sunday').length
-  const breakAfter = EVENTS_START + firstDay - 1
+   The two sides attend different functions, so the day break sits
+   at a different tick on each: it is found from the list rather
+   than counted out here. */
+export default function ProgressRail({ index, total, events, eventsStart }) {
+  const firstDay = events.filter((e) => e.day === 'Sunday').length
+  const breakAfter = firstDay ? eventsStart + firstDay - 1 : -1
 
   return (
     <div className="rail" aria-hidden="true">

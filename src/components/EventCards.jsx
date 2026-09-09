@@ -1,18 +1,26 @@
 import { motion, useTransform } from 'framer-motion'
 import { MapPin } from 'lucide-react'
 import PlateArt from './PlateArt'
+import SlideArt from './SlideArt'
 import Frame from './Frame'
 import Reveal from './Reveal'
 import { useEasedProgress, useSlideProgress } from '../hooks/useSlideScroll'
-import { EVENTS } from '../data/wedding'
+import { useSide } from '../hooks/useSide'
 
 /* Every ceremony slide is drawn from this one component.
    Details are set as a ruled ledger rather than icon cards — it reads
-   the way the printed card would, and keeps the plate art breathing. */
+   the way the printed card would, and keeps the plate art breathing.
+
+   Which ceremonies appear, and which language they are set in,
+   both come from the side the guest chose. By the time an event
+   reaches here it has already been flattened to one language, so
+   nothing below this line knows there are two. */
 export default function EventCards({ start = 0 }) {
+  const { events } = useSide()
+
   return (
     <>
-      {EVENTS.map((e, i) => (
+      {events.map((e, i) => (
         <EventSlide key={e.id} event={e} index={start + i} />
       ))}
     </>
@@ -20,6 +28,7 @@ export default function EventCards({ start = 0 }) {
 }
 
 function EventSlide({ event, index }) {
+  const { script } = useSide()
   const light = event.dark ? '#f4efe3' : 'var(--ivory)'
   const p = useSlideProgress(index)
   const eased = useEasedProgress(index)
@@ -32,6 +41,16 @@ function EventSlide({ event, index }) {
   return (
     <section className="slide" id={event.id} aria-label={event.en}>
       <PlateArt src={event.plate} wash={event.wash} dark={event.dark} p={p} />
+
+      {/* Cut-out art for this ceremony, over the wash and under the
+          copy. A slide may carry one piece or several — Nalangu has
+          foliage on one side and a bunch on the other — so a single
+          object and a list are both accepted here. */}
+      {event.art &&
+        (Array.isArray(event.art) ? event.art : [event.art]).map((a, i) => (
+          <SlideArt key={`${a.src}-${i}`} {...a} p={p} />
+        ))}
+
       <Frame color="rgba(247,241,227,0.42)" />
 
       <div className="copy" style={{ color: light }}>
@@ -44,13 +63,22 @@ function EventSlide({ event, index }) {
           {event.eyebrow}
         </Reveal>
 
+        {/* Hindi for the groom's guests, Tamil for the bride's.
+            Tamil sets taller than Devanagari at the same size, so
+            it is stepped down a touch to keep the two flows
+            optically matched. */}
         <Reveal
           p={eased}
           order={1}
-          className="deva"
-          style={{ fontSize: 19, opacity: 0.88, marginBottom: 2 }}
+          className={script}
+          style={{
+            fontSize: script === 'tamil' ? 16.5 : 19,
+            lineHeight: script === 'tamil' ? 1.5 : 1.35,
+            opacity: 0.88,
+            marginBottom: 4,
+          }}
         >
-          {event.hi}
+          {event.native}
         </Reveal>
 
         <Reveal
@@ -58,7 +86,7 @@ function EventSlide({ event, index }) {
           order={2}
           y={32}
           className="display"
-          style={{ fontSize: 'clamp(38px, 11vw, 54px)' }}
+          style={{ fontSize: 'clamp(30px, 8.6vw, 44px)', lineHeight: 1.02 }}
         >
           {event.en}
         </Reveal>

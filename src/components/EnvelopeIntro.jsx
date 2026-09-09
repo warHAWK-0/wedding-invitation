@@ -3,7 +3,13 @@ import { motion } from 'framer-motion'
 import { COUPLE } from '../data/wedding'
 
 /* The first screen. One job: invite a tap.
-   The tap is also what unlocks audio on mobile, so it does double duty. */
+   The tap is also what unlocks audio on mobile, so it does double duty.
+
+   This is the one screen that arrives before the guest has told us
+   which family they are with, so it speaks to both: the Devanagari
+   invocation over the Tamil blessing, one above the other. They
+   are not translations of each other — each is the line its own
+   side would actually open a wedding card with. */
 export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
   const [opening, setOpening] = useState(false)
   const [sealOk, setSealOk] = useState(true)
@@ -51,19 +57,19 @@ export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
         aria-hidden="true"
       />
 
-      <motion.p
-        className="deva"
+      <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 1.1 }}
-        style={{
-          fontSize: 17,
-          color: 'var(--gold)',
-          letterSpacing: '0.02em',
-        }}
+        style={{ display: 'grid', gap: 5, color: 'var(--gold)' }}
       >
-        ॥ श्री गणेशाय नमः ॥
-      </motion.p>
+        <p className="deva" style={{ fontSize: 17, letterSpacing: '0.02em' }}>
+          ॥ श्री गणेशाय नमः ॥
+        </p>
+        <p className="tamil" style={{ fontSize: 14.5, opacity: 0.85 }}>
+          வாழ்க வளமுடன்
+        </p>
+      </motion.div>
 
       <motion.button
         onClick={handleOpen}
@@ -79,8 +85,8 @@ export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
           background: 'transparent',
           padding: 0,
           cursor: 'pointer',
-          width: 230,
-          maxWidth: '62vw',
+          width: 196,
+          maxWidth: '52vw',
         }}
       >
         {sealOk ? (

@@ -25,6 +25,7 @@
 
   --serif: 'Cormorant Garamond', 'Georgia', serif;
   --deva: 'Tiro Devanagari Hindi', 'Cormorant Garamond', serif;
+  --tamil: 'Noto Serif Tamil', 'Latha', 'Cormorant Garamond', serif;
 
   --frame-inset: 14px;
   --shell: 430px;
@@ -195,6 +196,19 @@ body {
   font-weight: 400;
 }
 
+/* The bride side's counterpart to .deva. Tamil glyphs carry
+   taller ascenders and deeper loops than Devanagari, so the two
+   never sit right at the same metrics: this one runs a little
+   lighter and a little looser, and every place that sets a native
+   line steps the size down for it. The aim is that a guest on
+   either side sees the same weight of ink on the page. */
+.tamil {
+  font-family: var(--tamil);
+  font-weight: 300;
+  line-height: 1.55;
+  letter-spacing: 0.005em;
+}
+
 .eyebrow {
   font-size: 10.5px;
   letter-spacing: 0.32em;
@@ -260,6 +274,57 @@ body {
   background: var(--gold);
   opacity: 0.55;
   margin: 3px 0;
+}
+
+/* ============================================================
+   RSVP fields
+
+   Ruled lines rather than boxes — the same device the ceremony
+   slides use for day, time and venue, so a guest is writing onto
+   the invitation rather than filling in a web form. The rule
+   itself is drawn by the slide; these only have to keep the
+   browser from imposing its own chrome.
+   ============================================================ */
+.field__label {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.field__input {
+  font-family: var(--serif);
+  width: 100%;
+  margin-top: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.field__input::placeholder {
+  color: currentColor;
+  opacity: 0.38;
+  font-style: italic;
+}
+/* iOS zooms the page in on any field under 16px when it focuses,
+   and there is no way back out of that zoom on a fixed layout. */
+@media (max-width: 480px) {
+  .field__input {
+    font-size: 16px;
+  }
+}
+.field__input:focus {
+  outline: 0;
+}
+.field__input:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 4px;
+}
+.field__input[aria-invalid='true']::placeholder {
+  color: #f0b189;
+  opacity: 0.7;
 }
 
 /* ============================================================

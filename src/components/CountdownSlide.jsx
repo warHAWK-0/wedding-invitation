@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, useTransform } from 'framer-motion'
 import Frame from './Frame'
 import Reveal from './Reveal'
 import { useEasedProgress, useSlideProgress } from '../hooks/useSlideScroll'
-import { COUNTDOWN_TARGET } from '../data/wedding'
+import { useSide } from '../hooks/useSide'
+import { countdownTarget } from '../data/wedding'
 
-const TARGET = new Date(COUNTDOWN_TARGET)
-
-function remaining() {
-  const diff = TARGET - new Date()
+/* Each side counts down to the first function it is actually
+   invited to — the morning puja for the groom's family, the
+   evening for the bride's — so nobody is shown a clock running
+   toward something they aren't attending. */
+function remaining(target) {
+  const diff = target - new Date()
   if (diff <= 0) return null
   return {
     days: Math.floor(diff / 86400000),
@@ -18,12 +21,19 @@ function remaining() {
   }
 }
 
+/* Each side attends a different number of functions, and the
+   closing line says so out loud — so it is spelled from the list
+   rather than typed in, and stays true if a function is added. */
+const COUNT = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight']
+
 /* The one slide with no plate behind it. It sits between the names
    and the ceremonies as a deliberate breath — so it gets a plain
    wash, and the wash itself drifts a little to keep the transition
    in and out from reading as a flat cut. */
 export default function CountdownSlide({ index }) {
-  const [t, setT] = useState(remaining)
+  const { side, events } = useSide()
+  const target = useMemo(() => new Date(countdownTarget(side)), [side])
+  const [t, setT] = useState(() => remaining(target))
   const p = useSlideProgress(index)
   const eased = useEasedProgress(index)
 
@@ -31,9 +41,10 @@ export default function CountdownSlide({ index }) {
   const veil = useTransform(p, [0.2, 0.5, 0.8], [0.55, 0, 0.55])
 
   useEffect(() => {
-    const id = setInterval(() => setT(remaining()), 1000)
+    setT(remaining(target))
+    const id = setInterval(() => setT(remaining(target)), 1000)
     return () => clearInterval(id)
-  }, [])
+  }, [target])
 
   return (
     <section
@@ -136,7 +147,7 @@ export default function CountdownSlide({ index }) {
                 lineHeight: 1.6,
               }}
             >
-              Two days, six ceremonies,
+              Two days, {COUNT[events.length] ?? events.length} ceremonies,
               <br />
               one family growing larger.
             </Reveal>
