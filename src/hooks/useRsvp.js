@@ -54,7 +54,7 @@ export default function useRsvp() {
   const [reply, setReply] = useState(readStoredRsvp)
   const [error, setError] = useState(null)
 
-  const submit = useCallback(async ({ name, guests, side }) => {
+  const submit = useCallback(async ({ name, phone, guests, side }) => {
     if (!RSVP_FORM.endpoint) {
       setError(
         'This form is not connected yet. Please tell the family directly for now.'
@@ -68,6 +68,7 @@ export default function useRsvp() {
 
     const payload = {
       name: name.trim(),
+      phone: (phone || '').trim(),
       guests,
       side,
       at: new Date().toISOString(),
@@ -123,7 +124,7 @@ export default function useRsvp() {
     }
 
     if (!sent) {
-      setError('That did not go through. Please check your connection and try again.')
+      setError('That did not reach us. Please check your connection and try once more.')
       setStatus('error')
       return false
     }

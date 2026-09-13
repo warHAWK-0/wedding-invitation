@@ -28,6 +28,17 @@ import { RSVP_COPY, RSVP_FORM } from '../data/wedding'
 
 const WASH = ['#2b3a2c', '#3d5132', '#6d7f48']
 
+/* Deliberately loose. This has to pass a number written the way a
+   guest actually writes one — with spaces, dashes, brackets, a
+   leading 0, a +91, or none of it — and the only thing it is
+   really guarding against is a half-typed number. A valid number
+   turned away is a guest who cannot reply; a typo that gets
+   through is a phone call the family makes twice. */
+function phoneOk(value) {
+  const digits = value.replace(/\D/g, '')
+  return digits.length >= 10 && digits.length <= 13
+}
+
 export default function RsvpSlide({ index }) {
   const { side, script } = useSide()
   const copy = RSVP_COPY[side]
@@ -37,23 +48,47 @@ export default function RsvpSlide({ index }) {
   const { status, reply, error, submit, reset } = useRsvp()
 
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [guests, setGuests] = useState(2)
   const [touched, setTouched] = useState(false)
 
   const ruleScale = useTransform(eased, [0.28, 0.46], [0, 1])
 
   const nameOk = name.trim().length > 1
+  const numberOk = phoneOk(phone)
   const sending = status === 'sending'
+
+  /* One line for one problem, taken in the order the fields are
+     read — so a guest is never told about the second thing while
+     the first is still blank. */
+  const nag = !nameOk
+    ? 'May we know your name, so we can welcome you?'
+    : !numberOk
+      ? 'A number would help the family reach you on the day.'
+      : null
 
   const onSubmit = async (e) => {
     e.preventDefault()
     setTouched(true)
-    if (!nameOk || sending) return
-    await submit({ name, guests, side })
+    if (nag || sending) return
+    await submit({ name, phone, guests, side })
   }
 
   return (
-    <section className="slide" id="rsvp" aria-label="RSVP">
+    <section
+      className="slide"
+      id="rsvp"
+      aria-label="RSVP"
+      /* Every other slide anchors its copy to the bottom edge,
+         because every other slide has a picture above it holding
+         the top. This one, until it is answered, is a form on an
+         empty ground — bottom-anchored it left a tall phone with
+         two-thirds of a green page above the question. Centred, the
+         form is where the eye already is. Once it is answered the
+         flower fills the space above, so the reply goes back to
+         sitting on the bottom edge like the rest of the card. */
+      style={status === 'done' ? undefined : { justifyContent: 'center' }}
+    >
       <PlateArt src="/plates/rsvp.jpg" wash={WASH} dark p={p} />
 
       {/* Gold on the deep green, and only once they have replied —
@@ -63,8 +98,10 @@ export default function RsvpSlide({ index }) {
       {status === 'done' && (
         <SlideArt
           src="/plates/golden-flower.png"
-          width={250}
-          top={54}
+          width="clamp(220px, 34svh, 320px)"
+          flow
+          top="clamp(16px, 3.5svh, 40px)"
+          bottom="clamp(10px, 2svh, 22px)"
           opacity={0.9}
           play
           p={eased}
@@ -73,7 +110,10 @@ export default function RsvpSlide({ index }) {
 
       <Frame color="rgba(201,172,92,0.4)" />
 
-      <div className="copy" style={{ color: 'var(--ivory)', paddingBottom: 40 }}>
+      <div
+        className="copy"
+        style={{ color: 'var(--ivory)', flex: '0 0 auto' }}
+      >
         {status === 'done' ? (
           <Done copy={copy} script={script} reply={reply} p={eased} onAgain={reset} />
         ) : (
@@ -81,8 +121,8 @@ export default function RsvpSlide({ index }) {
             <Reveal
               p={eased}
               order={0}
-              className="eyebrow"
-              style={{ color: 'var(--gold-light)', marginBottom: 10 }}
+              className="eyebrow eyebrow--art"
+              style={{ marginBottom: 'var(--step-s)' }}
             >
               {copy.eyebrow}
             </Reveal>
@@ -114,7 +154,7 @@ export default function RsvpSlide({ index }) {
               p={eased}
               order={3}
               style={{
-                margin: '14px 0 20px',
+                margin: 'var(--step-m) 0 var(--step-l)',
                 fontSize: 15,
                 fontStyle: 'italic',
                 fontWeight: 300,
@@ -142,17 +182,56 @@ export default function RsvpSlide({ index }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     onBlur={() => setTouched(true)}
-                    placeholder="As we would know you"
+                    placeholder="As we should welcome you"
                     autoComplete="name"
-                    enterKeyHint="done"
+                    enterKeyHint="next"
                     aria-invalid={touched && !nameOk}
                     disabled={sending}
                   />
                 </Ruled>
 
+                {/* Asked for a reason, and the reason is said out
+                    loud on the line under the label. A number
+                    demanded by a form is an imposition; a number
+                    asked for so somebody can call you about the
+                    car is a courtesy. */}
+                <Ruled ruleScale={ruleScale} stacked>
+                  <label className="field__label" htmlFor="rsvp-phone">
+                    Phone number
+                  </label>
+                  <input
+                    id="rsvp-phone"
+                    className="field__input"
+                    type="tel"
+                    inputMode="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    onBlur={() => setTouched(true)}
+                    placeholder="Where we can reach you"
+                    autoComplete="tel"
+                    enterKeyHint="done"
+                    aria-describedby="rsvp-phone-why"
+                    aria-invalid={touched && !numberOk}
+                    disabled={sending}
+                  />
+                  <span
+                    id="rsvp-phone-why"
+                    style={{
+                      marginTop: 6,
+                      fontSize: 12.5,
+                      fontStyle: 'italic',
+                      opacity: 0.6,
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    Only so the family can reach you about timings and
+                    getting there.
+                  </span>
+                </Ruled>
+
                 <Ruled ruleScale={ruleScale}>
                   <span className="field__label" id="rsvp-guests-label">
-                    How many are coming
+                    How many will join us
                   </span>
                   <Stepper
                     value={guests}
@@ -167,16 +246,21 @@ export default function RsvpSlide({ index }) {
                 <p
                   role="status"
                   style={{
-                    minHeight: 18,
+                    /* Two lines held open, not one. The reason the
+                       height is reserved at all is so the button
+                       never jumps as a message appears, and the
+                       longest of these — the network failure — runs
+                       to two lines on a narrow phone. */
+                    minHeight: 36,
                     margin: '12px 0 4px',
                     fontSize: 12.5,
                     fontStyle: 'italic',
                     lineHeight: 1.45,
                     color: error ? '#f0b189' : 'var(--gold-light)',
-                    opacity: error || (touched && !nameOk) ? 0.95 : 0,
+                    opacity: error || (touched && nag) ? 0.95 : 0,
                   }}
                 >
-                  {error || (touched && !nameOk ? 'Please tell us your name.' : '·')}
+                  {error || (touched && nag) || '·'}
                 </p>
 
                 <button
@@ -191,7 +275,7 @@ export default function RsvpSlide({ index }) {
                   }}
                 >
                   <Send size={14} strokeWidth={1.5} aria-hidden="true" />
-                  {sending ? 'Sending…' : 'Send our reply'}
+                  {sending ? 'Sending…' : 'We will be there'}
                 </button>
               </form>
             </Reveal>
@@ -213,7 +297,7 @@ function Ruled({ ruleScale, stacked, children }) {
         gridTemplateColumns: stacked ? '1fr' : '1fr auto',
         alignItems: 'center',
         gap: stacked ? 0 : 12,
-        padding: '13px 0',
+        padding: 'clamp(9px, 1.7svh, 13px) 0',
       }}
     >
       <motion.span
@@ -348,7 +432,7 @@ function Done({ copy, script, reply, p, onAgain }) {
         p={p}
         order={3}
         style={{
-          margin: '16px 0 22px',
+          margin: 'var(--step-m) 0 var(--step-l)',
           fontSize: 15.5,
           fontStyle: 'italic',
           fontWeight: 300,
@@ -374,9 +458,16 @@ function Done({ copy, script, reply, p, onAgain }) {
         >
           {reply.name}
           <br />
-          <span style={{ opacity: 0.75 }}>
-            {reply.guests} {reply.guests === 1 ? 'guest' : 'guests'}
-          </span>
+          {/* Guarded: a reply sent before the phone field existed is
+              still sitting in this guest's localStorage, and is
+              shown back to them on every later visit. */}
+          {reply.phone && (
+            <>
+              <span style={{ opacity: 0.75 }}>{reply.phone}</span>
+              <br />
+            </>
+          )}
+          <span style={{ opacity: 0.75 }}>{reply.guests} joining us</span>
         </Reveal>
       )}
 
@@ -385,7 +476,7 @@ function Done({ copy, script, reply, p, onAgain }) {
           type="button"
           onClick={onAgain}
           style={{
-            marginTop: 20,
+            marginTop: 'var(--step-m)',
             padding: '6px 0',
             border: 0,
             background: 'transparent',
@@ -397,7 +488,7 @@ function Done({ copy, script, reply, p, onAgain }) {
             cursor: 'pointer',
           }}
         >
-          Something changed? Send another reply
+          Something changed? Do let us know
         </button>
       </Reveal>
     </>
