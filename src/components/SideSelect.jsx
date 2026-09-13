@@ -3,6 +3,7 @@ import {
   motion,
   useAnimationControls,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -15,13 +16,23 @@ import { COUPLE, SIDES } from '../data/wedding'
    link that goes to everybody. So before the invite proper, one
    screen asks which half of the wedding the guest belongs to.
 
-   Swiping is the gesture the screen is built around: the card
-   leans toward whichever side you are pulling it to, and the
-   label on that edge lifts as the other fades. But a swipe is
-   never the only way through — the two labels are real buttons,
-   and the arrow keys do the same job — because a good number of
-   these guests will be opening the link on a laptop, or with a
-   screen reader, or with hands that don't swipe reliably.
+   This screen used to be built around the swipe, with the two
+   sides as small labels underneath. That was the wrong way round.
+   Most of these guests are opening a WhatsApp link, many of them
+   are elders, and a drag is not a discoverable first move — you
+   have to already know it is there. A screen whose primary action
+   has to be explained by a pulsing hint has the wrong primary
+   action.
+
+   So the two sides are now two full-width cards, each naming the
+   family it belongs to, and the answer to "whose side are you
+   from?" is a thing you tap. The swipe is still here, and still
+   commits — it is a lovely gesture and some people will find it —
+   but it is now the shortcut rather than the road. The card gives
+   itself away with one small rock on arrival instead of a caption.
+
+   The arrow keys do the same job, for anyone on a laptop or a
+   screen reader.
    ============================================================ */
 
 /* Past this much drag (or this much flick), releasing commits. */
@@ -33,15 +44,28 @@ export default function SideSelect({ onChoose }) {
   const controls = useAnimationControls()
   const x = useMotionValue(0)
   const live = useRef(true)
+  /* Set the moment the card is touched, so the nudge below knows
+     to stay out of the way. */
+  const grabbed = useRef(false)
+  const reduceMotion = useReducedMotion()
 
   /* The card leans into the pull rather than sliding flat — it is
      what makes the gesture feel like turning toward a family
      rather than dismissing a notification. */
   const rotate = useTransform(x, [-180, 0, 180], [-10, 0, 10])
 
-  /* Each edge label brightens as the card comes toward it. */
-  const brideGlow = useTransform(x, [-COMMIT_PX, -12, 0], [1, 0.55, 0.42])
-  const groomGlow = useTransform(x, [0, 12, COMMIT_PX], [0.42, 0.55, 1])
+  /* Both cards sit at full strength at rest, and the one you are
+     dragging *away* from steps back.
+
+     These used to run the other way — 0.42 at rest, rising to 1 as
+     the card came toward them — which was right while they were
+     two small labels annotating the gesture. They are the primary
+     action now, and a primary action cannot be the faintest thing
+     on the screen waiting to be earned by a drag most guests will
+     never make. So rest is full, and the drag only dims the side
+     being turned down. */
+  const brideGlow = useTransform(x, [-COMMIT_PX, 0, COMMIT_PX], [1, 1, 0.45])
+  const groomGlow = useTransform(x, [-COMMIT_PX, 0, COMMIT_PX], [0.45, 1, 1])
   const brideMark = useTransform(x, [-COMMIT_PX, -20], [1, 0.25])
   const groomMark = useTransform(x, [20, COMMIT_PX], [0.25, 1])
 
@@ -87,6 +111,34 @@ export default function SideSelect({ onChoose }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [commit])
 
+  /* The one-time rock that says the card moves.
+
+     A caption cannot teach a gesture — it can only describe one,
+     and by the time somebody has read "swipe either way" they have
+     already decided this screen is asking them to work. Showing
+     the card give a little under its own weight does the whole job
+     wordlessly, and it is over before it can be mistaken for an
+     animation that is going to keep happening.
+
+     It waits a beat so it lands after the screen has settled, and
+     it stands down entirely if the guest has already grabbed the
+     card — interrupting somebody mid-drag to demonstrate dragging
+     would be its own small insult. */
+  useEffect(() => {
+    if (reduceMotion) return
+
+    const id = setTimeout(() => {
+      if (!live.current || grabbed.current) return
+      controls.start({
+        x: [0, -14, 12, 0],
+        rotate: [0, -1.2, 1, 0],
+        transition: { duration: 0.9, ease: [0.4, 0, 0.2, 1], times: [0, 0.35, 0.7, 1] },
+      })
+    }, 1100)
+
+    return () => clearTimeout(id)
+  }, [controls, reduceMotion])
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -109,10 +161,16 @@ export default function SideSelect({ onChoose }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 26,
-        padding: '34px 26px calc(34px + env(safe-area-inset-bottom))',
+        /* Two three-line cards is more screen than the old pair of
+           small boxes, so the gaps give way before the content
+           does — and `auto` overflow is the last resort for a short
+           landscape phone, where nothing would have fitted. */
+        gap: 'clamp(14px, 3svh, 26px)',
+        padding:
+          'clamp(20px, 4svh, 34px) 26px calc(clamp(20px, 4svh, 34px) + env(safe-area-inset-bottom))',
         textAlign: 'center',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
       }}
     >
       <div
@@ -172,6 +230,9 @@ export default function SideSelect({ onChoose }) {
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.75}
           dragMomentum={false}
+          onDragStart={() => {
+            grabbed.current = true
+          }}
           onDragEnd={handleDragEnd}
           animate={controls}
           style={{
@@ -181,13 +242,13 @@ export default function SideSelect({ onChoose }) {
             touchAction: 'pan-y',
             cursor: 'grab',
             flex: '0 1 236px',
-            padding: '30px 20px 26px',
+            padding: 'clamp(18px, 3.5svh, 30px) 20px clamp(16px, 3svh, 26px)',
             background:
               'linear-gradient(180deg, rgba(255,252,245,0.96) 0%, rgba(247,241,227,0.92) 100%)',
             border: '1px solid rgba(165,135,44,0.5)',
             boxShadow: '0 18px 44px rgba(62,50,38,0.16)',
             display: 'grid',
-            gap: 12,
+            gap: 'clamp(7px, 1.5svh, 12px)',
             justifyItems: 'center',
           }}
         >
@@ -228,30 +289,29 @@ export default function SideSelect({ onChoose }) {
             style={{ height: 1, width: 46, background: 'rgba(165,135,44,0.45)', margin: '2px 0' }}
           />
 
+          {/* Quiet now, and no longer pulsing. The cards below are
+              the instruction; this is a footnote for anyone who
+              felt the card give under the nudge and wondered. */}
           <motion.p
-            animate={committed ? { opacity: 0 } : { opacity: [0.45, 1, 0.45] }}
-            transition={
-              committed
-                ? { duration: 0.2 }
-                : { duration: 3, repeat: Infinity, ease: 'easeInOut' }
-            }
+            animate={{ opacity: committed ? 0 : 0.55 }}
+            transition={{ duration: 0.4 }}
             className="eyebrow"
             style={{ color: 'var(--ink-faint)', fontSize: 9 }}
           >
-            Swipe either way
+            or swipe the card
           </motion.p>
         </motion.div>
 
         <Arrow dir="right" opacity={groomMark} />
       </div>
 
-      {/* The same two choices as plain buttons. Anyone who would
-          rather tap, or is on a laptop, never has to discover the
-          gesture at all. */}
+      {/* The actual question, answered by tapping. Each card names
+          the family as well as the side, because "bride's side" is
+          a category and "the Manimaran family" is the thing a guest
+          actually recognises themselves in. */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
           gap: 10,
           width: '100%',
           maxWidth: 330,
@@ -304,6 +364,13 @@ function Arrow({ dir, opacity }) {
   )
 }
 
+/* One side, as a card you tap.
+
+   Full width, left-aligned, three lines and a chevron — the shape
+   of a row that goes somewhere, which is the whole point. The two
+   used to share a row as small centred boxes, and at that size
+   neither the tap target nor the reading order made it obvious
+   they were the way through. */
 function SideButton({ side, script, glow, onClick, chosen }) {
   return (
     <motion.button
@@ -314,27 +381,56 @@ function SideButton({ side, script, glow, onClick, chosen }) {
         opacity: glow,
         fontFamily: 'var(--serif)',
         display: 'grid',
-        gap: 5,
-        justifyItems: 'center',
-        padding: '12px 8px',
+        gridTemplateColumns: '1fr auto',
+        alignItems: 'center',
+        gap: 12,
+        textAlign: 'left',
+        /* Comfortably past the 44px tap minimum, and set in the
+           padding rather than a fixed height so the Tamil card and
+           the Devanagari one stay the same size as their scripts
+           set at different heights. */
+        padding: '14px 16px',
         border: '1px solid rgba(165,135,44,0.45)',
-        background: chosen ? 'rgba(201,172,92,0.22)' : 'transparent',
+        background: chosen ? 'rgba(201,172,92,0.22)' : 'rgba(255,252,245,0.5)',
         color: 'var(--ink)',
         cursor: 'pointer',
       }}
     >
-      <span
-        className={script}
-        style={{ fontSize: script === 'tamil' ? 13 : 14.5, color: 'var(--gold)' }}
-      >
-        {side.label.native}
+      <span style={{ display: 'grid', gap: 3 }}>
+        <span
+          className={script}
+          style={{
+            fontSize: script === 'tamil' ? 14 : 15.5,
+            color: 'var(--gold)',
+            lineHeight: 1.35,
+          }}
+        >
+          {side.label.native}
+        </span>
+        <span
+          style={{
+            fontSize: 16.5,
+            fontStyle: 'italic',
+            fontWeight: 300,
+            lineHeight: 1.2,
+          }}
+        >
+          {side.label.en}
+        </span>
+        <span
+          className="eyebrow"
+          style={{ color: 'var(--ink-soft)', fontSize: 9, letterSpacing: '0.18em' }}
+        >
+          {side.house.en}
+        </span>
       </span>
-      <span
-        className="eyebrow"
-        style={{ color: 'var(--ink-soft)', fontSize: 9, letterSpacing: '0.2em' }}
-      >
-        {side.label.en}
-      </span>
+
+      <ChevronRight
+        size={18}
+        strokeWidth={1.3}
+        aria-hidden="true"
+        style={{ color: 'var(--gold)', opacity: 0.7 }}
+      />
     </motion.button>
   )
 }
