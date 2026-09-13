@@ -53,12 +53,16 @@ function EventSlide({ event, index }) {
 
       <Frame color="rgba(247,241,227,0.42)" />
 
-      <div className="copy" style={{ color: light }}>
+      {/* `flex: 0 0 auto` is what lets flowing art work above this.
+          The copy takes exactly the height it needs and gives the
+          rest of the slide back, so the art can centre in what is
+          left instead of the two being placed independently. */}
+      <div className="copy" style={{ color: light, flex: '0 0 auto' }}>
         <Reveal
           p={eased}
           order={0}
-          className="eyebrow"
-          style={{ color: 'var(--gold-light)', marginBottom: 12 }}
+          className="eyebrow eyebrow--art"
+          style={{ marginBottom: 'var(--step-s)' }}
         >
           {event.eyebrow}
         </Reveal>
@@ -95,7 +99,7 @@ function EventSlide({ event, index }) {
           p={eased}
           order={3}
           style={{
-            margin: '16px 0 22px',
+            margin: 'var(--step-m) 0 var(--step-l)',
             fontSize: 15.5,
             fontStyle: 'italic',
             fontWeight: 300,
@@ -144,7 +148,7 @@ function EventSlide({ event, index }) {
             target="_blank"
             rel="noreferrer"
             style={{
-              marginTop: 22,
+              marginTop: 'var(--step-l)',
               color: light,
               borderColor: 'rgba(247,241,227,0.45)',
             }}
@@ -171,7 +175,7 @@ function Row({ label, value, light, ruleScale }) {
         display: 'grid',
         gridTemplateColumns: '78px 1fr',
         gap: 14,
-        padding: '11px 0',
+        padding: 'clamp(8px, 1.5svh, 12px) 0',
         alignItems: 'baseline',
       }}
     >

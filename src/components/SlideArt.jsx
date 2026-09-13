@@ -175,7 +175,24 @@ export default function SlideArt({
       initial={{ opacity: 0, y: -16, scale: 0.94 }}
       animate={play ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0 }}
       transition={{ delay: 0.15, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+      /* The entrance wrapper has to keep whichever layout mode the
+         art is in. Overlaying it absolutely is right for pinned art
+         — the hero's hands sit over the slide — but a flowing piece
+         has to stay a flex item or it drops out of the layout it
+         was put there to take part in, and the copy below it
+         silently reclaims the space. So the wrapper becomes the
+         flex item and hands the row on to the frame inside it. */
+      style={
+        flow
+          ? {
+              position: 'relative',
+              flex: '1 1 auto',
+              minHeight: 0,
+              display: 'flex',
+              pointerEvents: 'none',
+            }
+          : { position: 'absolute', inset: 0, pointerEvents: 'none' }
+      }
       aria-hidden="true"
     >
       {frame}

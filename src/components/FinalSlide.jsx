@@ -44,7 +44,6 @@ export default function FinalSlide({ index, onSwitchSide }) {
         className="copy"
         style={{
           color: 'var(--ivory)',
-          paddingBottom: 40,
           textAlign: 'center',
           flex: '0 0 auto',
         }}
@@ -63,7 +62,8 @@ export default function FinalSlide({ index, onSwitchSide }) {
                  the old 7px between each read as a list. */
               lineHeight: 1.5,
               opacity: 0.88,
-              marginBottom: i === blessing.lines.length - 1 ? 20 : 1,
+              marginBottom:
+                i === blessing.lines.length - 1 ? 'var(--step-m)' : 1,
             }}
           >
             {line}
@@ -88,7 +88,10 @@ export default function FinalSlide({ index, onSwitchSide }) {
           order={4}
           y={30}
           className="display"
-          style={{ fontSize: 'clamp(34px, 10vw, 46px)', marginBottom: 18 }}
+          style={{
+            fontSize: 'clamp(34px, 10vw, 46px)',
+            marginBottom: 'var(--step-m)',
+          }}
         >
           {copy.first} &amp; {copy.second}
         </Reveal>
@@ -102,7 +105,7 @@ export default function FinalSlide({ index, onSwitchSide }) {
             fontWeight: 300,
             opacity: 0.85,
             lineHeight: 1.6,
-            marginBottom: 22,
+            marginBottom: 'var(--step-l)',
           }}
         >
           {blessing.closing}
@@ -117,18 +120,48 @@ export default function FinalSlide({ index, onSwitchSide }) {
                 .getElementById('rsvp')
                 ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }
+            aria-label="We look forward to celebrating with you. Kindly RSVP."
             style={{
               color: '#2f2419',
               background: 'var(--gold-light)',
               borderColor: 'var(--gold-light)',
+              padding: '10px 22px',
+              gap: 12,
+              textAlign: 'left',
             }}
           >
             <ChevronDown size={15} strokeWidth={1.5} aria-hidden="true" />
-            Let us know you are coming
+            {/* Two sentences will not fit one line of tracked caps on
+                a phone, so they are set as two lines on purpose: the
+                warm sentence in the card's italic, and the action
+                under it in the button's usual caps. Wrapping by
+                accident stranded the chevron; stacking by design
+                gives it a block to sit beside. */}
+            <span style={{ display: 'grid', gap: 2 }}>
+              <span
+                style={{
+                  fontSize: 14.5,
+                  fontStyle: 'italic',
+                  letterSpacing: 0,
+                  textTransform: 'none',
+                  lineHeight: 1.25,
+                }}
+              >
+                We look forward to celebrating with you
+              </span>
+              <span style={{ fontSize: 12.5, lineHeight: 1.3 }}>Kindly RSVP</span>
+            </span>
           </button>
 
           {contact && (
-            <p style={{ marginTop: 14, fontSize: 13.5, opacity: 0.72, lineHeight: 1.55 }}>
+            <p
+              style={{
+                marginTop: 'var(--step-s)',
+                fontSize: 13.5,
+                opacity: 0.72,
+                lineHeight: 1.55,
+              }}
+            >
               {contact.name} · {contact.relation}
               <br />
               {/* Only a real number becomes a tel: link. A
@@ -149,7 +182,7 @@ export default function FinalSlide({ index, onSwitchSide }) {
 
           <p
             style={{
-              marginTop: 16,
+              marginTop: 'var(--step-m)',
               fontSize: 11,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
@@ -165,7 +198,7 @@ export default function FinalSlide({ index, onSwitchSide }) {
             type="button"
             onClick={onSwitchSide}
             style={{
-              marginTop: 14,
+              marginTop: 'var(--step-s)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: 7,

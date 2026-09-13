@@ -6,7 +6,7 @@
    off one codebase:
 
      groom — Hindi (Devanagari), the Bhatt side
-     bride — Tamil, Varsha's side
+     bride — Tamil, the Manimaran side
 
    A guest picks their side by swiping on the first screen, and
    from then on every slide reads in their family's language and
@@ -29,16 +29,12 @@ export const SIDES = {
     script: 'deva',
     label: { en: 'Groom’s side', native: 'वर पक्ष' },
     house: { en: 'The Bhatt family', native: 'भट्ट परिवार' },
-    hint: 'Swipe right',
   },
   bride: {
     id: 'bride',
     script: 'tamil',
     label: { en: 'Bride’s side', native: 'மணமகள் தரப்பு' },
-    /* TODO: confirm the family name Varsha's side should be
-       invited under, and replace both lines. */
-    house: { en: 'The family of Varsha', native: 'வர்ஷாவின் குடும்பம்' },
-    hint: 'Swipe left',
+    house: { en: 'The Manimaran family', native: 'மணிமாறன் குடும்பம்' },
   },
 }
 
@@ -67,9 +63,8 @@ export const SIDE_COPY = {
   },
   bride: {
     nativePair: 'வர்ஷா & சூரஜ்',
-    /* TODO: same family-name call as SIDES.bride.house. */
-    family: { en: 'The Family of Varsha', native: 'வர்ஷாவின் குடும்பம்' },
-    invite: 'Varsha’s family invite you to the wedding of',
+    family: { en: 'The Manimaran Family', native: 'மணிமாறன் குடும்பம்' },
+    invite: 'The Manimaran family invite you to the wedding of',
     first: 'Varsha',
     second: 'Suraj',
     joiner: 'and',
@@ -109,6 +104,25 @@ export const VENUES = {
              families can hold the same function and decorate it
              differently, and on a shared function one side may
              have art where the other has none.
+
+             There are two kinds, and the difference is what makes
+             the slides hold together at every screen height:
+
+             A piece that *floats* — a centred motif with air all
+             round it — is set `flow: true`. It joins the layout
+             above the copy, takes whatever height the copy did not
+             need, and centres in it. So the gap between picture and
+             text is always the space that is actually going spare:
+             it closes up on a small phone and opens out on a tall
+             one, instead of being a number that is only right once.
+
+             A piece that is *pinned* — foliage cut off at its own
+             stem, garlands drawn to hang, a horse walking in from
+             off the page — stays absolute at a `top`, because it
+             belongs to the edge of the slide rather than to the
+             copy. Flowing those would pull their deliberate crops
+             back into view, which is the one thing their placement
+             exists to prevent.
    -------------------------------------------------------------- */
 export const EVENTS = [
   {
@@ -126,7 +140,14 @@ export const EVENTS = [
       en: 'Ganesh Puja',
       eyebrow: 'The divine beginning',
       note: 'We begin at home, seeking Ganeshji’s blessings for the days ahead.',
-      art: { src: '/plates/ganesha-art.png', width: 208, top: 44 },
+      /* Floats — see the note on `art` above. */
+      art: {
+        src: '/plates/ganesha-art.png',
+        width: 'clamp(190px, 30svh, 290px)',
+        flow: true,
+        top: 'clamp(18px, 4svh, 44px)',
+        bottom: 'clamp(10px, 2svh, 22px)',
+      },
     },
   },
   {
@@ -148,7 +169,13 @@ export const EVENTS = [
       /* The same rings the bride's side sees on this evening, set
          at the same size — it is one ceremony, and both families
          should recognise it as the same page. */
-      art: { src: '/plates/rings-art.png', width: 218, top: 18 },
+      art: {
+        src: '/plates/rings-art.png',
+        width: 'clamp(200px, 31svh, 300px)',
+        flow: true,
+        top: 'clamp(14px, 3svh, 32px)',
+        bottom: 'clamp(10px, 2svh, 22px)',
+      },
     },
     bride: {
       /* மாற்றம் is the same "exchange" that returns in மாலை
@@ -159,7 +186,13 @@ export const EVENTS = [
       note: 'The rings are exchanged, both families meet, and the evening turns to music.',
       /* Sits on the one dark slide of the run, so it is given a
          little more room than art on a pale ground would need. */
-      art: { src: '/plates/rings-art.png', width: 218, top: 18 },
+      art: {
+        src: '/plates/rings-art.png',
+        width: 'clamp(200px, 31svh, 300px)',
+        flow: true,
+        top: 'clamp(14px, 3svh, 32px)',
+        bottom: 'clamp(10px, 2svh, 22px)',
+      },
     },
   },
   {
@@ -179,8 +212,20 @@ export const EVENTS = [
       note: 'Turmeric for the groom, at home. Wear something you don’t mind staining.',
       /* Marigold strings, drawn to hang, so they stay flush with
          the top edge — art that hangs should hang off something
-         rather than float in the middle. */
-      art: { src: '/plates/haldi-art.png', width: 300, top: 0 },
+         rather than float in the middle.
+
+         Pinned art cannot balance its own gap the way flowing art
+         does, because its whole job is to hold an edge. What it can
+         do is hold a constant *share* of the slide: a width in svh
+         makes the drop deeper on a tall screen and shorter on a
+         small one, so the band of empty page between the flowers
+         and the type stays the same wherever it is read. The image
+         keeps its ratio, so width is the lever for both axes. */
+      art: {
+        src: '/plates/haldi-art.png',
+        width: 'clamp(250px, 40svh, 330px)',
+        top: 0,
+      },
     },
   },
   {
@@ -207,7 +252,7 @@ export const EVENTS = [
       art: [
         {
           src: '/plates/nalangu-art.png',
-          width: 140,
+          width: 'clamp(120px, 20svh, 165px)',
           top: 0,
           align: 'left',
           inset: -14,
@@ -219,7 +264,7 @@ export const EVENTS = [
            rather than competing. */
         {
           src: '/plates/hang-flower.png',
-          width: 120,
+          width: 'clamp(105px, 17svh, 140px)',
           top: -18,
           align: 'right',
           inset: -10,
@@ -257,8 +302,8 @@ export const EVENTS = [
          banana foliage on the bride's morning. */
       art: {
         src: '/plates/horse-art.png',
-        width: 168,
-        top: 16,
+        width: 'clamp(145px, 24svh, 200px)',
+        top: 'clamp(8px, 2svh, 20px)',
         align: 'right',
         inset: -18,
       },
@@ -278,23 +323,31 @@ export const EVENTS = [
       native: 'वरमाला एवं विवाह',
       en: 'Varmala & Wedding',
       eyebrow: 'The garlands and the vows',
-      note: 'Suraj and Varsha exchange garlands, the families gather, and the wedding follows.',
+      note: 'The bride and groom exchange garlands, the families gather, and the wedding follows.',
       /* Same art, same placement as the bride's Maalai Maatral —
          see the note there for why it is hung above the slide. */
-      art: { src: '/plates/wedding-art.png', width: 296, top: -20 },
+      art: {
+        src: '/plates/wedding-art.png',
+        width: 'clamp(250px, 38svh, 330px)',
+        top: -20,
+      },
     },
     bride: {
       native: 'மாலை மாற்றல் & கல்யாணம்',
       en: 'Maalai Maatral & Kalyanam',
       eyebrow: 'The garlands and the vows',
-      note: 'Varsha and Suraj exchange garlands, the families gather, and the kalyanam follows.',
+      note: 'The bride and groom exchange garlands, the families gather, and the kalyanam follows.',
       /* Pinned to the top of the slide. Its own top edge is cropped
          hard, so it is hung a little above the slide to put that cut
          out of sight — far enough that the scroll drift can never
          pull it back down into view. Only the right edge is
          feathered in the file; the top is left crisp because it is
          never seen. */
-      art: { src: '/plates/wedding-art.png', width: 296, top: -20 },
+      art: {
+        src: '/plates/wedding-art.png',
+        width: 'clamp(250px, 38svh, 330px)',
+        top: -20,
+      },
     },
   },
 ]
@@ -333,9 +386,9 @@ export const BLESSING_ART = {
      where dead-centre in a tall gap reads as adrift. The width cap
      is what decides the size on a big phone; on a short one the
      height runs out first and the picture shrinks to suit. */
-  width: 236,
-  top: 16,
-  bottom: 34,
+  width: 'clamp(210px, 32svh, 300px)',
+  top: 'clamp(10px, 2svh, 20px)',
+  bottom: 'clamp(18px, 3.5svh, 34px)',
 }
 
 export const BLESSING = {
@@ -343,7 +396,7 @@ export const BLESSING = {
   groom: {
     lines: [
       'With the blessings of our elders,',
-      'and in loving memory of Varsha’s parents,',
+      'and in loving memory of the bride’s parents,',
       'whose presence we will feel through every ritual.',
     ],
     closing: 'Your presence is the blessing we are asking for.',
@@ -351,7 +404,7 @@ export const BLESSING = {
   bride: {
     lines: [
       'With the blessings of our elders,',
-      'and in loving memory of Varsha’s parents,',
+      'and in loving memory of the bride’s parents,',
       'whose presence we will feel through every ritual.',
     ],
     closing: 'Your presence is the blessing we are asking for.',
@@ -361,9 +414,9 @@ export const BLESSING = {
 /* --------------------------------------------------------------
    Who to call.
 
-   Only the groom's side lists a contact. Varsha's side has no
-   number to give out, so that block is simply absent and the
-   closing slide leaves the space out rather than showing a
+   Only the groom's side lists a contact. The Manimaran side has
+   no number to give out yet, so that block is simply absent and
+   the closing slide leaves the space out rather than showing a
    placeholder — a wrong number on a wedding invite is worse than
    no number at all.
    -------------------------------------------------------------- */
@@ -374,21 +427,21 @@ export const CONTACT = {
     phone: '919739651480',
     display: '+91 97396 51480',
   },
-  /* TODO: replace with the real contact on Varsha's side.
+  /* TODO: replace with the real contact on the Manimaran side,
+     in the same shape as the groom's block above.
 
-     `phone` is deliberately null rather than a stand-in number.
-     The display line is obviously a blank, but a dialable
-     placeholder would be worse than none — a guest tapping it
-     would ring a stranger, and on a wedding invite that is the
-     kind of mistake nobody catches until it happens. The closing
-     slide renders plain text while this is null, and turns it
-     back into a tel: link the moment a real number is set. */
-  bride: {
-    name: 'To be confirmed',
-    relation: 'Bride’s side',
-    phone: null,
-    display: '+91 XXXXX XXXXX',
-  },
+     Null, not a placeholder. This used to hold "To be confirmed"
+     and "+91 XXXXX XXXXX", which the closing slide then printed
+     on the card for every bride-side guest to read — an invite
+     that admits, in gold, that it is not finished. Absent is the
+     honest state, and the slide already omits the block entirely
+     when there is nothing here.
+
+     When a real contact arrives, a real `phone` also turns the
+     display line back into a tel: link. Never fill `phone` with a
+     stand-in: a guest tapping it would ring a stranger, and that
+     is the kind of mistake nobody catches until it happens. */
+  bride: null,
 }
 
 /* --------------------------------------------------------------
@@ -414,25 +467,34 @@ export const RSVP_FORM = {
 
 /* The form slide, in each side's own language. The field labels
    stay English like the day/time/venue labels on the ceremony
-   slides — it is the heading and the accent line that change. */
+   slides — it is the heading and the accent line that change.
+
+   The tone matters more here than anywhere else on the site. An
+   Indian family does not summon its guests: it hopes for them, and
+   asks after them. So nothing on this slide instructs — "क्या आप आ
+   रहे हैं?" ("are you coming?") is a checklist question, where
+   asking a guest to join the family in its happiness is an
+   invitation, and the difference is the whole slide. Every field
+   below is asked the same way, as a request the guest is free to
+   answer rather than a form they owe. */
 export const RSVP_COPY = {
   groom: {
-    eyebrow: 'Kindly reply',
-    native: 'क्या आप आ रहे हैं?',
-    en: 'Will you join us?',
-    note: 'Tell us who you are and how many are coming, so we can keep a seat for each of you.',
+    eyebrow: 'With your blessings',
+    native: 'क्या आप हमारे साथ इस ख़ुशी में शामिल होंगे?',
+    en: 'Will you join us in this happiness?',
+    note: 'Please share your name and the number of guests joining you, so we can welcome each of you.',
     doneNative: 'धन्यवाद',
     doneEn: 'Thank you',
-    doneNote: 'Your reply is with the family. We will see you in December.',
+    doneNote: 'Your reply has reached the family. We are counting the days until we see you in December.',
   },
   bride: {
-    eyebrow: 'Kindly reply',
-    native: 'நீங்கள் வருகிறீர்களா?',
-    en: 'Will you join us?',
-    note: 'Tell us who you are and how many are coming, so we can keep a seat for each of you.',
+    eyebrow: 'With your blessings',
+    native: 'இந்த மகிழ்ச்சியில் நீங்களும் எங்களுடன் இணைவீர்களா?',
+    en: 'Will you join us in this happiness?',
+    note: 'Please share your name and the number of guests joining you, so we can welcome each of you.',
     doneNative: 'நன்றி',
     doneEn: 'Thank you',
-    doneNote: 'Your reply is with the family. We will see you in December.',
+    doneNote: 'Your reply has reached the family. We are counting the days until we see you in December.',
   },
 }
 

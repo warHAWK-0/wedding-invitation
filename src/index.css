@@ -29,6 +29,26 @@
 
   --frame-inset: 14px;
   --shell: 430px;
+
+  /* Vertical rhythm.
+
+     Every slide is a fixed-height box with the copy anchored to
+     its bottom edge, so any spacing written in px is only right at
+     one screen height — too tight on a small phone, and adrift on
+     a tall one. These are the steps the slides space by instead:
+     they hold a sensible floor and ceiling and move with the
+     viewport in between.
+
+     `svh` is the *small* viewport height — the screen with the
+     browser chrome showing. That is deliberately the conservative
+     end, and it is also exactly what `.snap` occupies, since a
+     fixed element is laid out against the small viewport. So these
+     resolve against the same box the slides are drawn in. */
+  --copy-x: clamp(22px, 7vw, 34px);
+  --copy-b: clamp(26px, 5svh, 46px);
+  --step-s: clamp(8px, 1.4svh, 14px);
+  --step-m: clamp(12px, 2.2svh, 22px);
+  --step-l: clamp(16px, 3svh, 28px);
 }
 
 /* ============================================================
@@ -217,6 +237,39 @@ body {
   color: var(--accent, var(--gold));
 }
 
+/* The eyebrow where it sits over art rather than on paper.
+
+   Gold on a photograph is the one place the accent colour stops
+   working: it is a mid-tone, the scrim behind the top of the copy
+   block is at its thinnest there, and on the pale washes the two
+   land within a couple of points of each other. Set at 10.5px with
+   0.32em of tracking there was almost nothing left to read.
+
+   So the gold moves out of the text and into a rule in front of
+   it. A hairline can be low-contrast without costing anything —
+   it is a mark, not a word — and the accent language of the card
+   survives while the text itself goes to ivory, where it clears
+   contrast on every plate. The tracking comes in a little too:
+   0.32em is a printed-caps figure that small type on a busy
+   ground cannot carry. */
+.eyebrow--art {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ivory);
+  opacity: 0.92;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-shadow: 0 1px 8px rgba(24, 16, 8, 0.5);
+}
+.eyebrow--art::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 20px;
+  height: 1px;
+  background: var(--gold-light);
+}
+
 .display {
   font-size: clamp(46px, 13.5vw, 66px);
   font-weight: 300;
@@ -238,7 +291,19 @@ body {
 .copy {
   position: relative;
   z-index: 2;
-  padding: 0 34px calc(46px + env(safe-area-inset-bottom));
+  padding: 0 var(--copy-x) calc(var(--copy-b) + env(safe-area-inset-bottom));
+}
+
+/* Below this the display type is what runs out of room first —
+   two 44px lines and a ledger will not fit a 640px screen with
+   the art above them. Everything else is already on the steps. */
+@media (max-height: 700px) {
+  :root {
+    --copy-b: 22px;
+  }
+  .display {
+    font-size: clamp(34px, 11vw, 46px);
+  }
 }
 
 /* ============================================================

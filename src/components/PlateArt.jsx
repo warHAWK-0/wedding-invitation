@@ -57,13 +57,23 @@ export default function PlateArt({ src, wash, dark, p }) {
         )}
       </motion.div>
 
-      {/* Reading scrim: keeps the copy legible over any plate. */}
+      {/* Reading scrim: keeps the copy legible over any plate.
+
+          The stops are set from where the copy block actually sits,
+          not by eye. Its *last* line is at the very bottom, where
+          the scrim has always been deep enough — but its first line,
+          the eyebrow, lands around a third of the way up, and at
+          0.42 there was not enough ground under it for small type
+          on a pale wash. So the mid stop is deeper and the fade
+          starts higher: the whole block gets a real ground rather
+          than only its bottom third, while the top of the plate is
+          still left clear for the art. */}
       <div
         className="plate__scrim"
         style={{
           background: dark
-            ? 'linear-gradient(to top, rgba(18,20,32,0.92) 0%, rgba(18,20,32,0.55) 34%, rgba(18,20,32,0.05) 62%)'
-            : 'linear-gradient(to top, rgba(46,36,24,0.86) 0%, rgba(46,36,24,0.42) 34%, rgba(46,36,24,0) 62%)',
+            ? 'linear-gradient(to top, rgba(18,20,32,0.94) 0%, rgba(18,20,32,0.68) 38%, rgba(18,20,32,0.06) 72%)'
+            : 'linear-gradient(to top, rgba(46,36,24,0.90) 0%, rgba(46,36,24,0.60) 38%, rgba(46,36,24,0) 72%)',
         }}
       />
 

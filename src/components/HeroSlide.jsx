@@ -36,7 +36,13 @@ export default function HeroSlide({ index, play }) {
       />
       <Frame color="rgba(247,241,227,0.5)" />
 
-      <div className="copy" style={{ color: 'var(--ivory)', paddingBottom: 64 }}>
+      <div
+        className="copy"
+        style={{
+          color: 'var(--ivory)',
+          paddingBottom: 'calc(clamp(38px, 7svh, 64px) + env(safe-area-inset-bottom))',
+        }}
+      >
         <IntroReveal
           p={eased}
           play={play}
@@ -142,7 +148,13 @@ export default function HeroSlide({ index, play }) {
           come in from off the canvas — so this runs the full width
           and lets those cuts land past the screen, where they read
           as the arms continuing rather than as crops. */}
-      <SlideArt src="/plates/hands-art.png" width="100%" top={54} play={play} p={p} />
+      <SlideArt
+        src="/plates/hands-art.png"
+        width="100%"
+        top="clamp(24px, 7svh, 64px)"
+        play={play}
+        p={p}
+      />
 
       <ScrollCue play={play} p={p} />
     </section>
