@@ -36,11 +36,35 @@ export default function HeroSlide({ index, play }) {
       />
       <Frame color="rgba(247,241,227,0.5)" />
 
+      {/* Agni, the sacred fire every vow is taken before — the
+          witness to the wedding, set at the head of the invitation.
+
+          Unlike the hands it replaced, this is a centred motif with
+          air all round it rather than full-bleed art cut off at the
+          edges, so it flows: it takes the height the names leave
+          free and centres in it, shrinking on a short phone instead
+          of running into the type. Flow art has to come before the
+          copy in the document to sit above it. */}
+      <SlideArt
+        src="/plates/agni-art.png"
+        width="clamp(210px, 32svh, 300px)"
+        flow
+        top="clamp(24px, 6svh, 60px)"
+        bottom="clamp(10px, 2svh, 22px)"
+        play={play}
+        p={p}
+      />
+
       <div
         className="copy"
         style={{
           color: 'var(--ivory)',
-          paddingBottom: 'calc(clamp(38px, 7svh, 64px) + env(safe-area-inset-bottom))',
+          flex: '0 0 auto',
+          /* Held clear of the scroll cue, which is pinned 18px off
+             the bottom and stands about 45px tall. Any less than
+             this on a short phone and "Scroll" lands on the same
+             line as the city. */
+          paddingBottom: 'calc(clamp(66px, 8svh, 76px) + env(safe-area-inset-bottom))',
         }}
       >
         <IntroReveal
@@ -142,19 +166,6 @@ export default function HeroSlide({ index, play }) {
           <span style={{ opacity: 0.7 }}>{COUPLE.city}</span>
         </IntroReveal>
       </div>
-
-      {/* Two hands reaching for each other across the head of the
-          slide. Both arms are cut off at their own edges — they
-          come in from off the canvas — so this runs the full width
-          and lets those cuts land past the screen, where they read
-          as the arms continuing rather than as crops. */}
-      <SlideArt
-        src="/plates/hands-art.png"
-        width="100%"
-        top="clamp(24px, 7svh, 64px)"
-        play={play}
-        p={p}
-      />
 
       <ScrollCue play={play} p={p} />
     </section>
