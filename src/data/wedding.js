@@ -242,7 +242,7 @@ export const EVENTS = [
       native: 'நலங்கு',
       en: 'Nalangu',
       eyebrow: 'Turmeric morning',
-      note: 'Manjal and sandalwood for the bride at the venue, with songs from the women of the family.',
+      note: 'Manjal and sandalwood for the bride at the venue, as the family gathers to bless her.',
       /* Banana foliage, drawn cut off at its own left edge, so it
          is pinned to that side and hung a little past it — the
          leaves creep in from off the page rather than sitting in
