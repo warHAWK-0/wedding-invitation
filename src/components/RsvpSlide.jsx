@@ -50,7 +50,13 @@ export default function RsvpSlide({ index }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [guests, setGuests] = useState(2)
-  const [touched, setTouched] = useState(false)
+  /* Tracked per field. One flag for the whole form meant leaving the
+     name field marked the phone field as wrong before a digit had been
+     typed into it — and with the underline carrying the error colour,
+     that premature red was the first thing a guest saw. Submitting
+     marks everything, so nothing is missed on the way out. */
+  const [touched, setTouched] = useState({ name: false, phone: false, submit: false })
+  const touch = (field) => setTouched((t) => (t[field] ? t : { ...t, [field]: true }))
 
   const ruleScale = useTransform(eased, [0.28, 0.46], [0, 1])
 
@@ -67,9 +73,20 @@ export default function RsvpSlide({ index }) {
       ? 'A number would help the family reach you on the day.'
       : null
 
+  /* The message speaks only about a field the guest has already left
+     (or about everything, once they have tried to send) — never about
+     one they have not reached yet. */
+  const nagShown = touched.submit
+    ? nag
+    : touched.name && !nameOk
+      ? nag
+      : nameOk && touched.phone && !numberOk
+        ? nag
+        : null
+
   const onSubmit = async (e) => {
     e.preventDefault()
-    setTouched(true)
+    setTouched({ name: true, phone: true, submit: true })
     if (nag || sending) return
     await submit({ name, phone, guests, side })
   }
@@ -134,7 +151,7 @@ export default function RsvpSlide({ index }) {
               style={{
                 fontSize: script === 'tamil' ? 16 : 18,
                 opacity: 0.88,
-                marginBottom: 2,
+                marginBottom: 6,
               }}
             >
               {copy.native}
@@ -145,60 +162,60 @@ export default function RsvpSlide({ index }) {
               order={2}
               y={30}
               className="display"
-              style={{ fontSize: 'clamp(32px, 9.4vw, 46px)' }}
+              /* The biggest gap on the slide, and the only one of its
+                 size: it separates the question from the form. The
+                 eyebrow, native line and heading above it stay tight
+                 as one group; the fields below share their own
+                 smaller, even rhythm. */
+              style={{
+                fontSize: 'clamp(32px, 9.4vw, 46px)',
+                marginBottom: 'clamp(28px, 4.6svh, 40px)',
+              }}
             >
               {copy.en}
             </Reveal>
 
-            <Reveal
-              p={eased}
-              order={3}
-              style={{
-                margin: 'var(--step-m) 0 var(--step-l)',
-                fontSize: 15,
-                fontStyle: 'italic',
-                fontWeight: 300,
-                lineHeight: 1.6,
-                opacity: 0.84,
-                maxWidth: '32ch',
-              }}
-            >
-              {copy.note}
-            </Reveal>
-
             <Reveal p={eased} order={4}>
               <form onSubmit={onSubmit} noValidate>
-                {/* The name gets the whole width under its label;
-                    the stepper sits out on the same line as its
-                    own, the way a printed form would set them. */}
-                <Ruled ruleScale={ruleScale} stacked>
-                  <label className="field__label" htmlFor="rsvp-name">
-                    Your name
-                  </label>
+                {/* Each line now underlines the thing you type into,
+                    rather than sitting between one field and the next.
+                    Drawn above a group, a rule reads as a divider
+                    between sections; drawn under the input, it reads
+                    as "write here" — which is the only job it has. */}
+                <Field
+                  ruleScale={ruleScale}
+                  label="Your name"
+                  htmlFor="rsvp-name"
+                  invalid={touched.name && !nameOk}
+                >
                   <input
                     id="rsvp-name"
                     className="field__input"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    onBlur={() => setTouched(true)}
-                    placeholder="As we should welcome you"
+                    onBlur={() => touch('name')}
                     autoComplete="name"
                     enterKeyHint="next"
-                    aria-invalid={touched && !nameOk}
+                    aria-invalid={touched.name && !nameOk}
                     disabled={sending}
                   />
-                </Ruled>
+                </Field>
 
-                {/* Asked for a reason, and the reason is said out
-                    loud on the line under the label. A number
-                    demanded by a form is an imposition; a number
-                    asked for so somebody can call you about the
-                    car is a courtesy. */}
-                <Ruled ruleScale={ruleScale} stacked>
-                  <label className="field__label" htmlFor="rsvp-phone">
-                    Phone number
-                  </label>
+                {/* Asked for a reason, and the reason is said out loud
+                    under the line. A number demanded by a form is an
+                    imposition; a number asked for so somebody can call
+                    you about the car is a courtesy. */}
+                <Field
+                  ruleScale={ruleScale}
+                  label="Phone number"
+                  htmlFor="rsvp-phone"
+                  invalid={touched.phone && !numberOk}
+                  hint={{
+                    id: 'rsvp-phone-why',
+                    text: 'Only so the family can reach you about timings and getting there.',
+                  }}
+                >
                   <input
                     id="rsvp-phone"
                     className="field__input"
@@ -206,30 +223,18 @@ export default function RsvpSlide({ index }) {
                     inputMode="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    onBlur={() => setTouched(true)}
-                    placeholder="Where we can reach you"
+                    onBlur={() => touch('phone')}
                     autoComplete="tel"
                     enterKeyHint="done"
                     aria-describedby="rsvp-phone-why"
-                    aria-invalid={touched && !numberOk}
+                    aria-invalid={touched.phone && !numberOk}
                     disabled={sending}
                   />
-                  <span
-                    id="rsvp-phone-why"
-                    style={{
-                      marginTop: 6,
-                      fontSize: 12.5,
-                      fontStyle: 'italic',
-                      opacity: 0.6,
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    Only so the family can reach you about timings and
-                    getting there.
-                  </span>
-                </Ruled>
+                </Field>
 
-                <Ruled ruleScale={ruleScale}>
+                {/* The stepper's own buttons already mark it as
+                    something to press, so this row gets no line. */}
+                <div className="field field--inline">
                   <span className="field__label" id="rsvp-guests-label">
                     How many will join us
                   </span>
@@ -239,44 +244,50 @@ export default function RsvpSlide({ index }) {
                     disabled={sending}
                     labelledBy="rsvp-guests-label"
                   />
-                </Ruled>
+                </div>
 
-                {/* One line, reserved whether or not it is in use, so
-                    the button never jumps as a message appears. */}
-                <p
-                  role="status"
-                  style={{
-                    /* Two lines held open, not one. The reason the
-                       height is reserved at all is so the button
-                       never jumps as a message appears, and the
-                       longest of these — the network failure — runs
-                       to two lines on a narrow phone. */
-                    minHeight: 36,
-                    margin: '12px 0 4px',
-                    fontSize: 12.5,
-                    fontStyle: 'italic',
-                    lineHeight: 1.45,
-                    color: error ? '#f0b189' : 'var(--gold-light)',
-                    opacity: error || (touched && nag) ? 0.95 : 0,
-                  }}
-                >
-                  {error || (touched && nag) || '·'}
-                </p>
-
-                <button
-                  className="btn"
-                  type="submit"
-                  disabled={sending}
-                  style={{
-                    color: '#22301f',
-                    background: 'var(--gold-light)',
-                    borderColor: 'var(--gold-light)',
-                    opacity: sending ? 0.7 : 1,
-                  }}
-                >
-                  <Send size={14} strokeWidth={1.5} aria-hidden="true" />
-                  {sending ? 'Sending…' : 'We will be there'}
-                </button>
+                <div style={{ position: 'relative' }}>
+                  <button
+                    className="btn"
+                    type="submit"
+                    disabled={sending}
+                    style={{
+                      color: '#22301f',
+                      background: 'var(--gold-light)',
+                      borderColor: 'var(--gold-light)',
+                      opacity: sending ? 0.7 : 1,
+                    }}
+                  >
+                    <Send size={14} strokeWidth={1.5} aria-hidden="true" />
+                    {sending ? 'Sending…' : 'We will be there'}
+                  </button>
+                    {/* Hung just under the button and taken out of the
+                        flow. In the flow, even held below the button, its
+                        reserved height was counted when the form is
+                        centred on the slide — so the visible form sat
+                        high with a hollow beneath it. Positioned, it
+                        takes no space: the button never moves when a
+                        message appears, and the form centres on what is
+                        actually there. The slide's bottom padding leaves
+                        room for two lines of it. */}
+                  <p
+                    role="status"
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 10px)',
+                      left: 0,
+                      right: 0,
+                      margin: 0,
+                      fontSize: 12.5,
+                      fontStyle: 'italic',
+                      lineHeight: 1.45,
+                      color: error ? '#f0b189' : 'var(--gold-light)',
+                      opacity: error || nagShown ? 0.95 : 0,
+                    }}
+                  >
+                    {error || nagShown || '·'}
+                  </p>
+                </div>
               </form>
             </Reveal>
           </>
@@ -286,34 +297,30 @@ export default function RsvpSlide({ index }) {
   )
 }
 
-/* A field on a ruled line — the same device the ceremony slides
-   use for day, time and venue. */
-function Ruled({ ruleScale, stacked, children }) {
+/* A labelled input with its rule drawn underneath it — the same
+   hairline the ceremony slides use for day, time and venue, put to
+   work marking where to write. It draws in from the left as the
+   slide arrives, brightens to gold while the field has focus, and
+   turns warm when the field needs attention. */
+function Field({ ruleScale, label, htmlFor, invalid, hint, children }) {
   return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'grid',
-        gridTemplateColumns: stacked ? '1fr' : '1fr auto',
-        alignItems: 'center',
-        gap: stacked ? 0 : 12,
-        padding: 'clamp(9px, 1.7svh, 13px) 0',
-      }}
-    >
-      <motion.span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 1,
-          background: 'rgba(247,241,227,0.24)',
-          scaleX: ruleScale,
-          transformOrigin: 'left',
-        }}
-      />
-      {children}
+    <div className="field">
+      <label className="field__label" htmlFor={htmlFor}>
+        {label}
+      </label>
+      <div className="field__box" data-invalid={invalid || undefined}>
+        {children}
+        <motion.span
+          aria-hidden="true"
+          className="field__rule"
+          style={{ scaleX: ruleScale }}
+        />
+      </div>
+      {hint && (
+        <span id={hint.id} className="field__hint">
+          {hint.text}
+        </span>
+      )}
     </div>
   )
 }

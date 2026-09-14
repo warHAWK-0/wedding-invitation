@@ -350,6 +350,21 @@ body {
    itself is drawn by the slide; these only have to keep the
    browser from imposing its own chrome.
    ============================================================ */
+/* Two spacings, used consistently. Inside a field — label, input,
+   rule, hint — everything is 8px apart, so each field reads as one
+   unit. Between fields the gap is roughly three times that, so the
+   units read as separate. Mixing 6s, 7s and 22s had left it hard to
+   tell where one field ended and the next began. */
+.field {
+  display: grid;
+  margin-bottom: clamp(20px, 3.2svh, 28px);
+}
+.field--inline {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
 .field__label {
   font-size: 9.5px;
   letter-spacing: 0.2em;
@@ -357,21 +372,45 @@ body {
   opacity: 0.62;
 }
 
+/* The box carries the rule, so the line always sits exactly under
+   the text being typed, whatever the input's own metrics are. */
+.field__box {
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.field__rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(247, 241, 227, 0.42);
+  transform-origin: left;
+  transition: background-color 0.25s ease, height 0.25s ease;
+}
+/* Focus is shown on the rule itself: it thickens to 2px and turns
+   gold. That is a clear, high-contrast indicator on its own, so the
+   field does not also need a box drawn round it — which had been
+   landing on top of the underline and the label above. */
+.field__box:focus-within .field__rule {
+  background: var(--gold-light);
+  height: 2px;
+}
+.field__box[data-invalid] .field__rule {
+  background: #f0b189;
+}
+
 .field__input {
   font-family: var(--serif);
   width: 100%;
-  margin-top: 5px;
+  margin-top: 8px;
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
   font-size: 17px;
   line-height: 1.4;
-}
-.field__input::placeholder {
-  color: currentColor;
-  opacity: 0.38;
-  font-style: italic;
 }
 /* iOS zooms the page in on any field under 16px when it focuses,
    and there is no way back out of that zoom on a fixed layout. */
@@ -380,16 +419,17 @@ body {
     font-size: 16px;
   }
 }
-.field__input:focus {
+.field__input:focus,
+.field__input:focus-visible {
   outline: 0;
 }
-.field__input:focus-visible {
-  outline: 2px solid var(--gold-light);
-  outline-offset: 4px;
-}
-.field__input[aria-invalid='true']::placeholder {
-  color: #f0b189;
-  opacity: 0.7;
+
+.field__hint {
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-style: italic;
+  opacity: 0.6;
+  line-height: 1.45;
 }
 
 /* ============================================================
