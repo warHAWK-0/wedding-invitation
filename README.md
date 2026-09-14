@@ -141,18 +141,22 @@ connection.
 
 ## Music
 
-Two tracks, optional. Put `seal.mp3` and `inner.mp3` in `public/audio/`. The
-first plays on the envelope screen, the second takes over once it opens, with a
-crossfade. A mute button sits bottom-right.
+One song, *A Thousand Years* (wedding cut), in `public/audio/a-thousand-years.mp3`.
+It fades in on the guest's first tap and loops. A music button sits bottom-right:
+before the song has started it plays it, after that it mutes and unmutes.
 
-If you'd rather have no music, set `AUDIO.enabled` to `false` in
-`src/data/wedding.js`. If the files are simply missing, playback fails silently
-and nothing breaks.
+Phones will not play sound before a real tap, so the song cannot start on its
+own. On a first visit it starts from the envelope tap. A guest who has already
+opened the invite this session skips the envelope, so for them it starts on
+their first tap anywhere instead.
 
-Phones will not autoplay audio. Playback can only start inside a real tap, which
-is why it begins on the envelope touch and not on a timer. This is the most
-fragile part of the site — test it on a real iPhone and a real Android before
-sending the link out.
+To change the song, replace the file and update `AUDIO.track` in
+`src/data/wedding.js`. `AUDIO.volume` sets how loud it fades up to. To turn
+music off, set `AUDIO.enabled` to `false`. A missing file fails silently.
+
+This is the most fragile part of the site — test it on a real iPhone and a real
+Android before sending the link out. On an iPhone, the ringer/silent switch
+mutes web audio completely, so a guest with the switch on will hear nothing.
 
 ---
 

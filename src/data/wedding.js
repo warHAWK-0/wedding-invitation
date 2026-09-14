@@ -497,10 +497,12 @@ export const RSVP_COPY = {
 }
 
 /* --------------------------------------------------------------
-   Audio. Drop the two files into public/audio/ and set enabled.
+   Audio. One song in public/audio/; set enabled: false for silence.
    -------------------------------------------------------------- */
 export const AUDIO = {
   enabled: true,
-  seal: '/audio/seal.mp3',
-  inner: '/audio/inner.mp3',
+  /* One song, looped. It starts on the guest's first tap — phones do
+     not allow sound before one — and carries on across every slide. */
+  track: '/audio/a-thousand-years.mp3',
+  volume: 0.7,
 }

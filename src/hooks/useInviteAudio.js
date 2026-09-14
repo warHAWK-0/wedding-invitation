@@ -1,82 +1,99 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AUDIO } from '../data/wedding'
 
-/* Two tracks, one control.
-   Phones will not autoplay audio — playback can only begin inside a
-   real touch or click, which is why start() is called from the
-   envelope tap rather than from a timer. */
+/* One song, one control.
+
+   Phones will not start audio on their own — playback can only begin
+   inside a real touch, click or key press. So `start()` is called from
+   the envelope tap, and it is safe to call more than once: the envelope
+   calls it on first touch and again as it opens, and the song carries
+   straight on rather than restarting.
+
+   A guest who has already opened the invite this session never sees
+   the envelope, so for them there is no envelope tap to start from.
+   Their first touch anywhere does it instead — the side chooser, a
+   scroll, anything. Touches on the music button itself are left out
+   of that, because that same touch goes on to toggle the button, and
+   starting the song only to mute it a moment later would look broken. */
 export default function useInviteAudio() {
-  const seal = useRef(null)
-  const inner = useRef(null)
+  const track = useRef(null)
   const fader = useRef(null)
+  const started = useRef(false)
+  const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
-  const [active, setActive] = useState(null)
 
   useEffect(() => {
     if (!AUDIO.enabled) return
-    seal.current = new Audio(AUDIO.seal)
-    inner.current = new Audio(AUDIO.inner)
-    for (const a of [seal.current, inner.current]) {
-      a.loop = true
-      a.preload = 'auto'
-      a.volume = 0
-    }
+    const a = new Audio(AUDIO.track)
+    a.loop = true
+    a.preload = 'auto'
+    a.volume = 0
+    track.current = a
     return () => {
       clearInterval(fader.current)
-      for (const a of [seal.current, inner.current]) {
-        if (a) {
-          a.pause()
-          a.src = ''
-        }
-      }
+      a.pause()
+      a.src = ''
     }
   }, [])
 
-  const fade = useCallback((el, to, ms = 700) => {
-    if (!el) return
+  const fadeTo = useCallback((to, ms) => {
+    const a = track.current
+    if (!a) return
     clearInterval(fader.current)
-    const from = el.volume
+    const from = a.volume
     const steps = Math.max(1, Math.round(ms / 40))
     let i = 0
     fader.current = setInterval(() => {
       i += 1
-      el.volume = Math.min(1, Math.max(0, from + ((to - from) * i) / steps))
-      if (i >= steps) {
-        clearInterval(fader.current)
-        if (to === 0) el.pause()
-      }
+      a.volume = Math.min(1, Math.max(0, from + ((to - from) * i) / steps))
+      if (i >= steps) clearInterval(fader.current)
     }, 40)
   }, [])
 
-  /* Called from the first touch on the envelope screen. */
-  const startSeal = useCallback(() => {
-    if (!AUDIO.enabled || !seal.current || active) return
-    seal.current.play().then(() => {
-      setActive('seal')
-      fade(seal.current, 0.75, 1400)
-    }).catch(() => {})
-  }, [active, fade])
+  const start = useCallback(() => {
+    const a = track.current
+    if (!AUDIO.enabled || !a || started.current) return
+    started.current = true
+    a.play()
+      .then(() => {
+        setPlaying(true)
+        fadeTo(AUDIO.volume, 1800)
+      })
+      .catch(() => {
+        /* Blocked — the browser did not count this as a gesture. Let
+           the next real touch try again. */
+        started.current = false
+      })
+  }, [fadeTo])
 
-  /* Called when the envelope opens — hands over to the second track. */
-  const startInner = useCallback(() => {
-    if (!AUDIO.enabled || !inner.current) return
-    if (seal.current && !seal.current.paused) fade(seal.current, 0, 600)
-    setTimeout(() => {
-      inner.current.play().then(() => {
-        setActive('inner')
-        inner.current.volume = 0
-        fade(inner.current, 0.7, 1600)
-      }).catch(() => {})
-    }, 380)
-  }, [fade])
+  /* First touch anywhere, for guests who skipped the envelope. */
+  useEffect(() => {
+    if (!AUDIO.enabled) return
+    const onGesture = (e) => {
+      if (started.current) return
+      if (e.target instanceof Element && e.target.closest('[data-music-toggle]')) return
+      start()
+    }
+    const events = ['pointerdown', 'touchstart', 'keydown']
+    for (const ev of events) window.addEventListener(ev, onGesture, { capture: true, passive: true })
+    return () => {
+      for (const ev of events) window.removeEventListener(ev, onGesture, { capture: true })
+    }
+  }, [start])
 
+  /* Not playing yet: the button starts the song. Playing: it mutes and
+     unmutes. */
   const toggleMute = useCallback(() => {
+    if (!started.current) {
+      start()
+      return
+    }
     setMuted((m) => {
       const next = !m
-      for (const a of [seal.current, inner.current]) if (a) a.muted = next
+      if (track.current) track.current.muted = next
       return next
     })
-  }, [])
+  }, [start])
 
-  return { startSeal, startInner, toggleMute, muted, hasAudio: AUDIO.enabled }
+  return { start, toggleMute, muted, playing, hasAudio: AUDIO.enabled }
 }

@@ -36,15 +36,15 @@ export default function App() {
   const scroller = useRef(null)
 
   const { side, choose, clear } = useSideChoice()
-  const { startSeal, startInner, toggleMute, muted, hasAudio } = useInviteAudio()
+  const { start, toggleMute, muted, playing, hasAudio } = useInviteAudio()
 
   const handleOpen = useCallback(() => {
-    startInner() // must fire inside the tap, or mobile blocks playback
+    start() // must fire inside the tap, or mobile blocks playback
     setTimeout(() => {
       sessionStorage.setItem('sv-invite-open', 'true')
       setOpen(true)
     }, 400)
-  }, [startInner])
+  }, [start])
 
   /* Changing side changes the slides underneath, so the scroller
      has to go back to the top or the guest lands mid-invite on a
@@ -83,7 +83,7 @@ export default function App() {
           {!open && (
             <EnvelopeIntro
               key="envelope"
-              onFirstTouch={startSeal}
+              onFirstTouch={start}
               onOpen={handleOpen}
             />
           )}
@@ -98,14 +98,18 @@ export default function App() {
         {open && side && hasAudio && (
           <button
             className="icon-btn"
+            /* Marked so the first-touch listener in useInviteAudio
+               leaves this button alone: this tap toggles the music
+               itself, and must not also start it on the way past. */
+            data-music-toggle
             onClick={toggleMute}
-            aria-label={muted ? 'Unmute music' : 'Mute music'}
+            aria-label={!playing ? 'Play music' : muted ? 'Unmute music' : 'Mute music'}
             style={{
               right: 'max(16px, env(safe-area-inset-right))',
               bottom: 'max(16px, env(safe-area-inset-bottom))',
             }}
           >
-            {muted ? (
+            {!playing || muted ? (
               <VolumeX size={16} strokeWidth={1.5} />
             ) : (
               <Volume2 size={16} strokeWidth={1.5} />

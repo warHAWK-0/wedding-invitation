@@ -1,7 +1,7 @@
-Two optional tracks:
+One track:
 
-  seal.mp3    plays on the envelope screen
-  inner.mp3   takes over once the invite opens
+  a-thousand-years.mp3   starts on the guest's first tap and loops
 
-Missing files fail silently. To turn music off entirely, set
-AUDIO.enabled = false in src/data/wedding.js
+To change the song, drop a new file in here and update AUDIO.track in
+src/data/wedding.js. A missing file fails silently. To turn music off
+entirely, set AUDIO.enabled = false.
