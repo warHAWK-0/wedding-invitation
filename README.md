@@ -141,7 +141,7 @@ connection.
 
 ## Music
 
-One song, *A Thousand Years* (wedding cut), in `public/audio/a-thousand-years.mp3`.
+One song, in `public/audio/score.mp3`.
 It fades in on the guest's first tap and loops. A music button sits bottom-right:
 before the song has started it plays it, after that it mutes and unmutes.
 

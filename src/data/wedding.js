@@ -503,6 +503,6 @@ export const AUDIO = {
   enabled: true,
   /* One song, looped. It starts on the guest's first tap — phones do
      not allow sound before one — and carries on across every slide. */
-  track: '/audio/a-thousand-years.mp3',
+  track: '/audio/score.mp3',
   volume: 0.7,
 }
