@@ -414,8 +414,7 @@ export const BLESSING = {
 /* --------------------------------------------------------------
    Who to call.
 
-   Only the groom's side lists a contact. The Manimaran side has
-   no number to give out yet, so that block is simply absent and
+   One contact per side. If a side's block is ever set to null,
    the closing slide leaves the space out rather than showing a
    placeholder — a wrong number on a wedding invite is worse than
    no number at all.
@@ -427,21 +426,12 @@ export const CONTACT = {
     phone: '919739651480',
     display: '+91 97396 51480',
   },
-  /* TODO: replace with the real contact on the Manimaran side,
-     in the same shape as the groom's block above.
-
-     Null, not a placeholder. This used to hold "To be confirmed"
-     and "+91 XXXXX XXXXX", which the closing slide then printed
-     on the card for every bride-side guest to read — an invite
-     that admits, in gold, that it is not finished. Absent is the
-     honest state, and the slide already omits the block entirely
-     when there is nothing here.
-
-     When a real contact arrives, a real `phone` also turns the
-     display line back into a tel: link. Never fill `phone` with a
-     stand-in: a guest tapping it would ring a stranger, and that
-     is the kind of mistake nobody catches until it happens. */
-  bride: null,
+  bride: {
+    name: 'Shashwat Manimaran',
+    relation: 'Brother of the bride',
+    phone: '919600137794',
+    display: '+91 96001 37794',
+  },
 }
 
 /* --------------------------------------------------------------

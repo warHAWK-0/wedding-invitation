@@ -301,9 +301,9 @@ rather than boxes, which is the device the ceremony slides use for day, time
 and venue. The action stays gold, because gold is what you press everywhere
 else on the site.
 
-Only the groom's side lists a phone number. Varsha's side has no contact to
-give out, so `CONTACT.bride` is `null` and the closing slide leaves the space
-out entirely — a wrong number on a wedding invite is worse than no number.
+Each side lists its own contact in `CONTACT`. Setting a side to `null` makes
+the closing slide leave the space out entirely — a wrong number on a wedding
+invite is worse than no number.
 
 ## The swipe screen
 
