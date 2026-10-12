@@ -64,10 +64,13 @@ export default function SideSelect({ onChoose }) {
      on the screen waiting to be earned by a drag most guests will
      never make. So rest is full, and the drag only dims the side
      being turned down. */
-  const brideGlow = useTransform(x, [-COMMIT_PX, 0, COMMIT_PX], [1, 1, 0.45])
-  const groomGlow = useTransform(x, [-COMMIT_PX, 0, COMMIT_PX], [0.45, 1, 1])
-  const brideMark = useTransform(x, [-COMMIT_PX, -20], [1, 0.25])
-  const groomMark = useTransform(x, [20, COMMIT_PX], [0.25, 1])
+  /* The card reads "Suraj & Varsha", so each side lives in the
+     direction of its own name: left toward the groom, right toward
+     the bride. */
+  const groomGlow = useTransform(x, [-COMMIT_PX, 0, COMMIT_PX], [1, 1, 0.45])
+  const brideGlow = useTransform(x, [-COMMIT_PX, 0, COMMIT_PX], [0.45, 1, 1])
+  const groomMark = useTransform(x, [-COMMIT_PX, -20], [1, 0.25])
+  const brideMark = useTransform(x, [20, COMMIT_PX], [0.25, 1])
 
   const commit = useCallback(
     (side) => {
@@ -76,9 +79,9 @@ export default function SideSelect({ onChoose }) {
       setCommitted(side)
       /* Send the card the way the guest sent it, then hand over. */
       controls.start({
-        x: side === 'groom' ? 460 : -460,
+        x: side === 'bride' ? 460 : -460,
         opacity: 0,
-        rotate: side === 'groom' ? 14 : -14,
+        rotate: side === 'bride' ? 14 : -14,
         transition: { duration: 0.42, ease: [0.4, 0, 0.2, 1] },
       })
       setTimeout(() => onChoose(side), 340)
@@ -97,15 +100,15 @@ export default function SideSelect({ onChoose }) {
       }
       /* A flick decides by its own direction; a slow drag by where
          it ended up. They agree except at the very edge of both. */
-      commit((fast ? velocity.x : offset.x) > 0 ? 'groom' : 'bride')
+      commit((fast ? velocity.x : offset.x) > 0 ? 'bride' : 'groom')
     },
     [commit, controls]
   )
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'ArrowRight') commit('groom')
-      if (e.key === 'ArrowLeft') commit('bride')
+      if (e.key === 'ArrowRight') commit('bride')
+      if (e.key === 'ArrowLeft') commit('groom')
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -223,7 +226,7 @@ export default function SideSelect({ onChoose }) {
           gap: 6,
         }}
       >
-        <Arrow dir="left" opacity={brideMark} />
+        <Arrow dir="left" opacity={groomMark} />
 
         <motion.div
           drag="x"
@@ -280,8 +283,8 @@ export default function SideSelect({ onChoose }) {
           </p>
 
           <p className="tamil" style={{ fontSize: 13.5, color: 'var(--gold)' }}>
-            {COUPLE.bride.ta} <span style={{ opacity: 0.6 }}>·</span>{' '}
-            {COUPLE.groom.ta}
+            {COUPLE.groom.ta} <span style={{ opacity: 0.6 }}>·</span>{' '}
+            {COUPLE.bride.ta}
           </p>
 
           <span
@@ -302,7 +305,7 @@ export default function SideSelect({ onChoose }) {
           </motion.p>
         </motion.div>
 
-        <Arrow dir="right" opacity={groomMark} />
+        <Arrow dir="right" opacity={brideMark} />
       </div>
 
       {/* The actual question, answered by tapping. Each card names
