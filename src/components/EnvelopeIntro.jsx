@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { COUPLE } from '../data/wedding'
 
 /* The first screen. One job: invite a tap.
    The tap is also what unlocks audio on mobile, so it does double duty.
+
+   A tap anywhere opens it, not just one on the seal. Plenty of guests
+   did not realise the Ganesha was the thing to press and sat looking
+   at the screen, so the whole screen is the button now. The seal is
+   still a real <button> for keyboards and screen readers; its click
+   bubbles up to the same handler, which only acts once.
 
    This is the one screen that arrives before the guest has told us
    which family they are with, so it speaks to both: the Devanagari
@@ -13,9 +19,11 @@ import { COUPLE } from '../data/wedding'
 export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
   const [opening, setOpening] = useState(false)
   const [sealOk, setSealOk] = useState(true)
+  const opened = useRef(false)
 
   const handleOpen = () => {
-    if (opening) return
+    if (opened.current) return
+    opened.current = true
     setOpening(true)
     onOpen()
   }
@@ -34,7 +42,9 @@ export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
       }}
       onTouchStart={onFirstTouch}
       onMouseDown={onFirstTouch}
+      onClick={handleOpen}
       style={{
+        cursor: 'pointer',
         position: 'fixed',
         inset: 0,
         zIndex: 60,
@@ -72,7 +82,6 @@ export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
       </motion.div>
 
       <motion.button
-        onClick={handleOpen}
         aria-label="Open the invitation"
         animate={opening ? { scale: 1.06, opacity: 0 } : { y: [0, -8, 0] }}
         transition={
@@ -124,7 +133,7 @@ export default function EnvelopeIntro({ onFirstTouch, onOpen }) {
           className="eyebrow"
           style={{ color: 'var(--ink-soft)' }}
         >
-          Tap to open
+          Tap anywhere to open
         </motion.p>
       </motion.div>
     </motion.div>
